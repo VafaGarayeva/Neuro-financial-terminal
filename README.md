@@ -2,6 +2,7 @@
 An interactive, bio-inspired financial trading dashboard that bridges the gap between Neuroscience and Market Data Analytics.
 
 🔗 Live Demo - https://vafagarayeva.github.io/Neuro-financial-terminal/
+
 🚀 Project Overview
 This project is a technical demonstration of my transition from a Biology (B.S., 2023) background into the fields of Finance (ACCA F3 Candidate) and Data Analytics. It simulates how human physiological states—specifically stress and reward—impact financial decision-making in a high-stakes environment.
 
