@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuro-Financial Analysis Terminal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* CSS: Dizayn və Rənglər */
+        body { background-color: #0b0e14; color: #00ff99; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+        .dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .panel { background: rgba(16, 20, 28, 0.95); border: 1px solid #333; padding: 20px; border-radius: 8px; text-align: center; }
+        
+        /* Qiymət blokları */
+        .price-row { display: flex; justify-content: space-around; margin: 15px 0; }
+        .price-val { font-size: 24px; color: #f1c40f; font-weight: bold; }
+        .label { font-size: 10px; color: #888; display: block; }
+        
+        /* Qrafik və Beyin simvolu */
+        #brain-svg { width: 100%; height: 200px; }
+        .chart-container { width: 100%; height: 120px; margin-top: 10px; }
+        
+        /* Panik vəziyyəti */
+        #brain-container.panic .brain-outline { stroke: #ff0844 !important; }
+        #brain-container.panic #amygdala { fill: #ff0844 !important; animation: pulse 0.5s infinite; }
+        
+        @keyframes pulse { 0% { r: 15; } 100% { r: 30; opacity: 0.5; } }
+
+        /* Düymə və Log */
+        .btn { width: 100%; padding: 15px; background: #00ff99; color: #000; border: none; font-weight: bold; cursor: pointer; }
+        .trade-log { text-align: left; font-size: 11px; margin-top: 15px; max-height: 100px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+  <div class="panel">
+    <h2><i class="fas fa-brain"></i> Neuro-Status</h2>
+    <div id="brain-container">
+      <svg id="brain-svg" viewBox="0 0 600 500">
+        <path class="brain-outline" d="M300,50 C150,50 50,150 50,250 C50,350 150,450 300,450 C450,450 550,350 550,250 C550,150 450,50 300,50 Z" fill="none" stroke="#4facfe" stroke-width="8"/>
+        <circle id="amygdala" cx="300" cy="280" r="20" fill="#4facfe" />
+      </svg>
+      <div id="brain-text">MEDITATED</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2><i class="fas fa-chart-line"></i> Market Terminal</h2>
+    <div class="price-row">
+      <div class="price-box">
+        <span class="label">BID (Sell)</span>
+        <div id="bid-price" class="price-val">--</div>
+      </div>
+      <div class="price-box">
+        <span class="label">ASK (Buy)</span>
+        <div id="ask-price" class="price-val">--</div>
+      </div>
+    </div>
+    <div style="font-size: 13px; color: #ccc;">
+      Oil: $<span id="oil-price">--</span> | USD: <span id="usd-price">--</span>
+    </div>
+    <div class="chart-container">
+      <canvas id="priceChart"></canvas>
+    </div>
+    <div id="market-status" style="margin-top:10px;">Market is Stable</div>
+  </div>
+
+  <div class="panel">
+    <h2><i class="fas fa-microchip"></i> Decision Lab</h2>
+    <button class="btn" onclick="processTrade()">EXECUTE TRADE</button>
+    <div class="trade-log">
+      <ul id="log-list"></ul>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    /* JAVASCRIPT: Məntiq */
+    let goldPrice = 2350.50;
+    let priceHistory = [2348, 2349, 2350, 2350.50];
+
+    // Qrafik
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const priceChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: priceHistory.map(()=>""), datasets: [{ data: priceHistory, borderColor: '#f1c40f', fill: true, backgroundColor: 'rgba(241, 196, 15, 0.1)', tension: 0.4 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { x: {display:false}, y: {display:false} }, plugins: {legend:{display:false}} }
+    });
+
+    // Bazarı yenilə
+    setInterval(() => {
+        let change = (Math.random() - 0.5) * 6;
+        goldPrice += change;
+        
+        document.getElementById('bid-price').innerText = (goldPrice - 0.4).toFixed(2);
+        document.getElementById('ask-price').innerText = (goldPrice + 0.4).toFixed(2);
+        document.getElementById('oil-price').innerText = (80 + Math.random()).toFixed(2);
+        document.getElementById('usd-price').innerText = "1.7000";
+
+        priceHistory.push(goldPrice);
+        if(priceHistory.length > 20) priceHistory.shift();
+        priceChart.update('none');
+
+        if(change < -2.5) triggerPanic();
+    }, 1500);
+
+    function triggerPanic() {
+        const container = document.getElementById('brain-container');
+        container.classList.add('panic');
+        document.getElementById('brain-text').innerText = "PANIC!";
+        setTimeout(() => {
+            container.classList.remove('panic');
+            document.getElementById('brain-text').innerText = "MEDITATED";
+        }, 3000);
+    }
+
+    function processTrade() {
+        const li = document.createElement('li');
+        li.innerText = `[${new Date().toLocaleTimeString()}] Trade at $${goldPrice.toFixed(2)}`;
+        document.getElementById('log-list').prepend(li);
+    }
+</script>
+</body>
+</html>
