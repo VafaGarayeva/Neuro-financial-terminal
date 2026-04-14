@@ -1,13 +1,14 @@
 🧠 Neuro-Financial Analysis Terminal
 An interactive, bio-inspired financial trading dashboard that bridges the gap between Neuroscience and Market Data Analytics.
 
+🔗 Live Demo - https://vafagarayeva.github.io/Neuro-financial-terminal/
 🚀 Project Overview
 This project is a technical demonstration of my transition from a Biology (B.S., 2023) background into the fields of Finance (ACCA F3 Candidate) and Data Analytics. It simulates how human physiological states—specifically stress and reward—impact financial decision-making in a high-stakes environment.
 
 🛠️ Key Features
 Neural State Visualization: Real-time brain SVG that tracks Amygdala activation during market volatility or crashes.
 
-Biometric Tracking: Dynamic circular gauges (Gauges) for Cortisol (Stress) and Dopamine (Reward) levels.
+Biometric Tracking: Dynamic circular gauges for Cortisol (Stress) and Dopamine (Reward) levels.
 
 Market Terminal: Live BID/ASK spread calculation for Gold, correlated with USD/AZN and Oil price fluctuations.
 
