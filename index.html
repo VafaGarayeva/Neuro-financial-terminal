@@ -3,262 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuro-Financial Analysis Terminal</title>
+    <title>Neuro-Financial Behavioral Simulation</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* 1. RETRO TERMINAL DİZAYNI */
         body {
             background-color: #0b0e14;
-            background-image: 
-                linear-gradient(rgba(18, 114, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(18, 114, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
             color: #00ff99;
             font-family: 'Courier New', monospace;
             margin: 0; padding: 20px;
-            overflow: hidden;
-            position: relative;
+            overflow-x: hidden;
         }
 
-        /* Scanline effekti - Pro görünüş üçün */
-        body::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            z-index: 10;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
+        /* Scanline retro effekti */
+        body::after {
+            content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            z-index: 9999; background-size: 100% 2px, 3px 100%; pointer-events: none;
         }
 
         .dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        
-        /* Mobil Uyğunluq */
-        @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; overflow-y: auto; } }
+        .panel { background: rgba(16, 20, 28, 0.95); border: 1px solid #333; padding: 15px; border-radius: 8px; position: relative; }
 
-        .panel { 
-            background: rgba(16, 20, 28, 0.95); 
-            border: 1px solid #333; 
-            padding: 20px; 
-            border-radius: 8px; 
-            backdrop-filter: blur(10px); 
-            position: relative;
-            transition: 0.3s;
+        /* 1. REJİMLƏR ÜÇÜN STYLE */
+        .mode-selector { display: flex; gap: 5px; margin-bottom: 15px; }
+        .mode-btn { 
+            flex: 1; padding: 8px; font-size: 10px; border: 1px solid #444; background: #1a1a1a; 
+            color: #888; cursor: pointer; transition: 0.3s; 
         }
+        .mode-btn.active { background: #4facfe; color: #000; border-color: #4facfe; font-weight: bold; }
 
-        /* Burnout/Donma Effekti */
-        .burnout-mode {
-            filter: grayscale(1) sepia(1) hue-rotate(-50deg) brightness(0.5);
-            pointer-events: none;
-        }
+        /* 2. FEAR & GREED GAUGE */
+        #fear-greed-container { text-align: center; margin-top: 10px; padding: 10px; border: 1px solid #222; }
+        .index-val { font-size: 20px; font-weight: bold; color: #f1c40f; }
 
-        /* Panik & Dopamin Animasiyaları */
-        #brain-container.panic .brain-outline { stroke: #ff0844 !important; filter: drop-shadow(0 0 15px #ff0844); }
-        #brain-container.panic #amygdala { fill: #ff0844 !important; animation: pulse 0.5s infinite; }
-        
+        /* BRAIN & GAUGES */
+        #brain-svg { width: 100%; height: 160px; }
+        .panic #amygdala { fill: #ff0844 !important; animation: pulse 0.5s infinite; }
         @keyframes pulse { 0% { r: 15; opacity: 1; } 100% { r: 35; opacity: 0.5; } }
 
-        .dopamine-active { animation: dopaminePulse 0.8s ease; }
-        @keyframes dopaminePulse {
-            0% { filter: drop-shadow(0 0 0px #f1c40f); transform: scale(1); }
-            50% { filter: drop-shadow(0 0 20px #f1c40f); transform: scale(1.03); }
-            100% { filter: drop-shadow(0 0 0px #f1c40f); transform: scale(1); }
-        }
+        .gauge-container { display: flex; justify-content: space-around; margin-top: 15px; }
+        .gauge { width: 80px; height: 40px; position: relative; overflow: hidden; }
+        .gauge-body { width: 80px; height: 80px; background: #222; border-radius: 50%; position: absolute; }
+        .gauge-fill { width: 100%; height: 100%; background: #00ff99; transform-origin: center center; transform: rotate(0.08turn); transition: 0.5s; }
+        .gauge-cover { width: 80%; height: 80%; background: #10141c; border-radius: 50%; position: absolute; top: 10%; left: 10%; }
 
-        /* Göstəricilər */
-        .price-val { font-size: 26px; color: #f1c40f; font-weight: bold; }
-        .label { font-size: 10px; color: #888; display: block; text-transform: uppercase; }
-        .spread-info { font-size: 12px; text-align: center; color: #4facfe; border-top: 1px solid #222; padding-top: 8px; margin-top: 10px; }
-
-        .gauge-container { display: flex; justify-content: space-around; margin-top: 25px; }
-        .gauge { width: 100px; height: 50px; position: relative; overflow: hidden; }
-        .gauge-body { width: 100px; height: 100px; background: #222; border-radius: 50%; position: absolute; }
-        .gauge-fill { width: 100%; height: 100%; background: #00ff99; transform-origin: center center; transform: rotate(0.08turn); transition: transform 0.5s ease; }
-        .gauge-fill.reward { background: #f1c40f; }
-        .gauge-cover { width: 80%; height: 80%; background: #10141c; border-radius: 50%; position: absolute; top: 10%; left: 10%; display: flex; align-items: flex-end; justify-content: center; font-size: 10px; color: #888; padding-bottom: 15px; }
-
-        .chart-container { height: 130px; margin-top: 15px; }
-        .btn { 
-            width: 100%; padding: 18px; background: #00ff99; color: #000; border: none; 
-            cursor: pointer; font-weight: bold; font-size: 14px; letter-spacing: 1px; transition: 0.2s; 
-        }
-        .btn:active { transform: scale(0.98); }
+        /* MARKET & LOG */
+        .price-val { font-size: 24px; color: #f1c40f; }
+        .btn { width: 100%; padding: 15px; background: #00ff99; color: #000; border: none; cursor: pointer; font-weight: bold; }
+        .btn:disabled { background: #333; color: #666; cursor: not-allowed; }
         
-        .trade-log { margin-top: 15px; font-size: 11px; max-height: 180px; overflow-y: auto; border-top: 1px dashed #333; padding-top: 10px; }
-        #log-list { list-style: none; padding: 0; margin: 0; }
-        #log-list li { margin-bottom: 6px; padding: 4px; border-radius: 4px; background: rgba(255,255,255,0.02); }
+        .trade-log { font-size: 10px; max-height: 150px; overflow-y: auto; margin-top: 10px; border-top: 1px solid #222; }
+        #log-list li { padding: 4px 0; border-bottom: 1px solid #1a1a1a; list-style: none; }
+
+        /* BURNOUT OVERLAY */
+        #burnout-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 8, 68, 0.2); backdrop-filter: blur(8px);
+            z-index: 10000; justify-content: center; align-items: center;
+            color: #ff0844; font-size: 30px; font-weight: bold; text-align: center;
+        }
     </style>
 </head>
 <body>
 
-<div class="dashboard" id="main-terminal">
-  <div class="panel">
-    <h2><i class="fas fa-brain"></i> Neuro-Status</h2>
-    <div id="brain-container">
-      <svg id="brain-svg" viewBox="0 0 600 500" style="width:100%; height:200px;">
-        <path class="brain-outline" d="M300,50 C150,50 50,150 50,250 C50,350 150,450 300,450 C450,450 550,350 550,250 C550,150 450,50 300,50 Z" fill="none" stroke="#4facfe" stroke-width="8"/>
-        <circle id="amygdala" cx="300" cy="280" r="22" fill="#4facfe" />
-      </svg>
-      <div id="brain-text" style="text-align:center; font-weight:bold; letter-spacing: 2px;">MEDITATED</div>
+<div id="burnout-overlay">⚠️ SYSTEM OVERLOAD ⚠️<br><span style="font-size:15px;">Məcburi Fasilə: Beyin çox yüklənib!</span></div>
+
+<div class="dashboard">
+    <div class="panel">
+        <h3><i class="fas fa-user-cog"></i> Condition</h3>
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="setMode('zen', this)">ZEN</button>
+            <button class="mode-btn" onclick="setMode('tired', this)">TIRED</button>
+            <button class="mode-btn" onclick="setMode('caffeine', this)">CAFFEINE</button>
+        </div>
+        
+        <div id="brain-container">
+            <svg id="brain-svg" viewBox="0 0 600 500">
+                <path d="M300,50 C150,50 50,150 50,250 C50,350 150,450 300,450 C450,450 550,350 550,250 C550,150 450,50 300,50 Z" fill="none" stroke="#4facfe" stroke-width="8"/>
+                <circle id="amygdala" cx="300" cy="280" r="20" fill="#4facfe" />
+            </svg>
+        </div>
+
+        <div class="gauge-container">
+            <div class="gauge"><div class="gauge-body"><div id="cort-fill" class="gauge-fill" style="background:#ff0844"></div></div><div class="gauge-cover"></div><small style="position:absolute; bottom:0; width:100%; text-align:center; font-size:8px;">Cortisol</small></div>
+            <div class="gauge"><div class="gauge-body"><div id="dop-fill" class="gauge-fill" style="background:#f1c40f"></div></div><div class="gauge-cover"></div><small style="position:absolute; bottom:0; width:100%; text-align:center; font-size:8px;">Dopamine</small></div>
+        </div>
     </div>
 
-    <div class="gauge-container">
-      <div class="gauge">
-        <div class="gauge-body"><div id="cort-fill" class="gauge-fill"></div></div>
-        <div class="gauge-cover">Cortisol</div>
-      </div>
-      <div class="gauge" id="dopamine-gauge">
-        <div class="gauge-body"><div id="dop-fill" class="gauge-fill reward"></div></div>
-        <div class="gauge-cover">Dopamine</div>
-      </div>
-    </div>
-  </div>
+    <div class="panel">
+        <h3><i class="fas fa-chart-line"></i> Market</h3>
+        <div style="display:flex; justify-content: space-around; text-align: center;">
+            <div><small>BID</small><div id="bid-price" class="price-val">--</div></div>
+            <div><small>ASK</small><div id="ask-price" class="price-val">--</div></div>
+        </div>
+        
+        <div id="fear-greed-container">
+            <small>FEAR & GREED INDEX</small>
+            <div id="fg-index" class="index-val">NEUTRAL</div>
+            <div style="font-size: 9px; color: #555;">(Bioloji Göstəricilər Əsasında)</div>
+        </div>
 
-  <div class="panel">
-    <h2><i class="fas fa-chart-line"></i> Market Terminal</h2>
-    <div class="price-row">
-      <div class="price-box"><span class="label">BID (Sell)</span><div id="bid-price" class="price-val">--</div></div>
-      <div class="price-box"><span class="label">ASK (Buy)</span><div id="ask-price" class="price-val">--</div></div>
-    </div>
-    <div class="spread-info">Emotional Tax (Spread): <span id="spread-val">0.80</span></div>
-    
-    <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:15px; color: #aaa;">
-        <span><i class="fas fa-oil-can"></i> Oil: $<span id="oil-price">--</span></span>
-        <span><i class="fas fa-flag"></i> USD/AZN: 1.7000</span>
+        <div style="height:100px; margin-top:10px;"><canvas id="priceChart"></canvas></div>
     </div>
 
-    <div class="chart-container"><canvas id="priceChart"></canvas></div>
-    <div id="market-status" style="text-align:center; margin-top:8px; font-weight: bold; font-size: 12px;">Market is Stable</div>
-  </div>
-
-  <div class="panel">
-    <h2><i class="fas fa-microchip"></i> Decision Lab</h2>
-    <button class="btn" onclick="processTrade()" id="trade-btn">EXECUTE TRADE</button>
-    <p id="feedback" style="font-size:11px; color:#666; text-align: center; margin-top: 10px;">Awaiting signal...</p>
-    
-    <div class="trade-log">
-      <h3 style="font-size: 13px;"><i class="fas fa-history"></i> Behavioral Log</h3>
-      <ul id="log-list"></ul>
+    <div class="panel">
+        <h3><i class="fas fa-microchip"></i> Decision Lab</h3>
+        <button class="btn" id="trade-btn" onclick="processTrade()">EXECUTE TRADE</button>
+        
+        <div class="trade-log">
+            <small>EMOTIONAL TRADE HISTORY</small>
+            <ul id="log-list"></ul>
+        </div>
     </div>
-  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     let goldPrice = 2350.50;
-    let oilPrice = 82.10;
-    let consecutiveWins = 0;
-    let isPanic = false;
+    let cortisol = 10;
+    let dopamine = 10;
+    let currentMode = 'zen';
     let isBurnout = false;
-    let priceHistory = [2348, 2349, 2350, 2350.50];
+    let priceHistory = [2350, 2351, 2349, 2350.50];
 
-    // Chart.js Setup
+    // Chart
     const ctx = document.getElementById('priceChart').getContext('2d');
     const priceChart = new Chart(ctx, {
         type: 'line',
-        data: {
-            labels: priceHistory.map(() => ""),
-            datasets: [{
-                data: priceHistory,
-                borderColor: '#f1c40f',
-                borderWidth: 2,
-                pointRadius: 0,
-                fill: true,
-                backgroundColor: 'rgba(241, 196, 15, 0.05)',
-                tension: 0.4
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, scales: { x: {display:false}, y: {display:false} }, plugins: {legend:{display:false}} }
+        data: { labels: priceHistory.map(()=>""), datasets: [{ data: priceHistory, borderColor: '#f1c40f', borderWidth: 1, pointRadius: 0, fill: false }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { x:{display:false}, y:{display:false} }, plugins: {legend:{display:false}} }
     });
+
+    function setMode(mode, btn) {
+        currentMode = mode;
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
 
     function updateMarket() {
         if (isBurnout) return;
 
-        let goldChange = (Math.random() - 0.5) * 8;
-        goldPrice += goldChange;
-        oilPrice += (Math.random() - 0.5) * 1.2;
+        let change = (Math.random() - 0.5) * 10;
+        goldPrice += change;
+        
+        // Rejim təsirləri
+        if (change < -3) {
+            let mult = currentMode === 'tired' ? 15 : (currentMode === 'zen' ? 3 : 8);
+            cortisol = Math.min(cortisol + mult, 100);
+        } else {
+            cortisol = Math.max(cortisol - 2, 5);
+        }
 
-        let baseSpread = isPanic ? 2.60 : 0.80;
-        let dopFactor = consecutiveWins * 0.12;
-        let finalSpread = (parseFloat(baseSpread) + dopFactor).toFixed(2);
+        // Vizual yeniləmə
+        document.getElementById('bid-price').innerText = (goldPrice - 0.5).toFixed(2);
+        document.getElementById('ask-price').innerText = (goldPrice + 0.5).toFixed(2);
+        document.getElementById('cort-fill').style.transform = `rotate(${cortisol/200}turn)`;
+        document.getElementById('dop-fill').style.transform = `rotate(${dopamine/200}turn)`;
 
-        document.getElementById('bid-price').innerText = (goldPrice - finalSpread/2).toFixed(2);
-        document.getElementById('ask-price').innerText = (goldPrice + finalSpread/2).toFixed(2);
-        document.getElementById('oil-price').innerText = oilPrice.toFixed(2);
-        document.getElementById('spread-val').innerText = finalSpread;
+        // Fear & Greed məntiqi
+        let fg = document.getElementById('fg-index');
+        if (cortisol > 60) { fg.innerText = "EXTREME FEAR"; fg.style.color = "#ff0844"; }
+        else if (dopamine > 60) { fg.innerText = "GREED"; fg.style.color = "#f1c40f"; }
+        else { fg.innerText = "NEUTRAL"; fg.style.color = "#4facfe"; }
+
+        // Brain Panic
+        if (cortisol > 50) document.getElementById('brain-container').classList.add('panic');
+        else document.getElementById('brain-container').classList.remove('panic');
+
+        // BURNOUT CHECK
+        if (cortisol >= 95 && !isBurnout) triggerBurnout();
 
         priceHistory.push(goldPrice);
         if (priceHistory.length > 20) priceHistory.shift();
         priceChart.update('none');
-
-        if (goldChange < -3.2) triggerPanic();
     }
 
-    function triggerPanic() {
-        isPanic = true;
-        const terminal = document.getElementById('main-terminal');
-        const container = document.getElementById('brain-container');
-        const cortFill = document.getElementById('cort-fill');
-        
-        container.classList.add('panic');
-        document.getElementById('brain-text').innerText = "SYSTEM OVERLOAD!";
-        document.getElementById('market-status').innerText = "CRASH DETECTED!";
-        document.getElementById('market-status').style.color = "#ff0844";
-        cortFill.style.transform = "rotate(0.45turn)";
-        cortFill.style.background = "#ff0844";
-
-        // BURNOUT MEXANİZMİ: 4 saniyəlik donma
+    function triggerBurnout() {
         isBurnout = true;
-        terminal.classList.add('burnout-mode');
-        document.getElementById('feedback').innerText = "COOLDOWN INITIATED...";
-
+        document.getElementById('burnout-overlay').style.display = 'flex';
         setTimeout(() => {
-            isPanic = false;
             isBurnout = false;
-            terminal.classList.remove('burnout-mode');
-            container.classList.remove('panic');
-            document.getElementById('brain-text').innerText = "MEDITATED";
-            document.getElementById('market-status').innerText = "Market is Stable";
-            document.getElementById('market-status').style.color = "#00ff99";
-            document.getElementById('feedback').innerText = "Ready for entry...";
-            cortFill.style.transform = "rotate(0.08turn)";
-            cortFill.style.background = "#00ff99";
-        }, 4500);
+            cortisol = 20;
+            document.getElementById('burnout-overlay').style.display = 'none';
+        }, 5000);
     }
 
     function processTrade() {
         if (isBurnout) return;
 
-        consecutiveWins++;
-        
-        // Dopamin vizual effekti
-        const dopGauge = document.getElementById('dopamine-gauge');
-        dopGauge.classList.remove('dopamine-active');
-        void dopGauge.offsetWidth; 
-        dopGauge.classList.add('dopamine-active');
-
-        let dopVal = Math.min(consecutiveWins * 20, 100);
-        document.getElementById('dop-fill').style.transform = `rotate(${dopVal/200}turn)`;
-
-        // Behavioral Log Qeydləri
-        const logList = document.getElementById('log-list');
+        dopamine = Math.min(dopamine + 15, 100);
+        const list = document.getElementById('log-list');
         const li = document.createElement('li');
-        let statusTag = "";
         
-        if (dopVal >= 80) {
-            statusTag = "<b style='color:#f1c40f;'>[GREED: High Risk]</b>";
-        } else if (isPanic) {
-            statusTag = "<b style='color:#ff0844;'>[FEAR: Panic Sell]</b>";
-        } else {
-            statusTag = "<b style='color:#4facfe;'>[STABLE: Rational]</b>";
-        }
+        let emotion = "";
+        if (cortisol > 50) emotion = "<b style='color:#ff0844'>[High Cortisol: Panic Move!]</b>";
+        else if (dopamine > 70) emotion = "<b style='color:#f1c40f'>[High Dopamine: Greed Cycle]</b>";
+        else emotion = "<b style='color:#00ff99'>[Zen State: Rational]</b>";
 
-        li.innerHTML = `[${new Date().toLocaleTimeString()}] $${goldPrice.toFixed(2)} | ${statusTag}`;
-        logList.prepend(li);
+        li.innerHTML = `${new Date().toLocaleTimeString()} - Trade Executed ${emotion}`;
+        list.prepend(li);
         
-        if (logList.children.length > 8) logList.lastChild.remove();
+        setTimeout(() => { dopamine = Math.max(dopamine - 10, 10); }, 2000);
     }
 
     setInterval(updateMarket, 1500);
