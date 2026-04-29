@@ -2,159 +2,180 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <title>Neuro-Finance Fix Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuro-Finance Ultimate Terminal | Vafa Garayeva</title>
     <style>
-        body { background: #05070a; color: #00ff99; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; overflow: hidden; }
-        .dashboard { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 20px; height: 90vh; }
-        .panel { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; }
-        
-        /* ASSETS */
-        .asset-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .card { background: #161b22; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #21262d; }
-        .val { font-size: 22px; font-weight: bold; color: #f1c40f; }
+        :root { --bg: #05070a; --panel: #0d1117; --accent: #00ff99; --stress: #ff0844; --logic: #4facfe; --text: #8b949e; }
+        body { background: var(--bg); color: var(--accent); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 15px; overflow: hidden; }
+        .dashboard { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 15px; height: 95vh; }
+        .panel { background: var(--panel); border: 1px solid #30363d; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; position: relative; }
+        h3 { font-size: 12px; text-transform: uppercase; color: var(--logic); margin: 0 0 10px 0; letter-spacing: 1px; }
 
-        /* BIOLOGY */
-        .bar-container { background: #05070a; height: 25px; border-radius: 12px; border: 1px solid #333; position: relative; margin: 10px 0; overflow: hidden; }
-        .bar-fill { height: 100%; width: 0%; transition: 0.5s; }
-        .bar-label { position: absolute; width: 100%; text-align: center; line-height: 25px; font-size: 12px; font-weight: bold; color: #fff; }
+        /* BRAIN VISUAL */
+        #brain-box { height: 160px; background: #05070a; border-radius: 8px; border: 1px solid #222; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; position: relative; }
+        #brain-svg { width: 150px; transition: 0.5s; }
+        .amygdala-pulse { animation: pulse 1s infinite alternate; }
+        @keyframes pulse { from { r: 6; fill: #ff0844; filter: blur(2px); } to { r: 10; fill: #ff0844; filter: blur(6px); } }
 
-        /* MODES */
-        .mode-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn { flex: 1; padding: 10px; background: #161b22; color: #8b949e; border: 1px solid #333; cursor: pointer; border-radius: 6px; }
-        .btn.active { background: #4facfe; color: #fff; border-color: #4facfe; }
+        /* MODES & BARS */
+        .mode-row { display: flex; gap: 5px; margin-bottom: 15px; }
+        .btn { flex: 1; padding: 8px; font-size: 10px; background: #161b22; border: 1px solid #333; color: var(--text); cursor: pointer; border-radius: 4px; }
+        .btn.active { background: var(--logic); color: white; border-color: var(--logic); box-shadow: 0 0 10px rgba(79,172,254,0.3); }
+        .bar-container { background: #05070a; height: 20px; border-radius: 10px; border: 1px solid #333; overflow: hidden; margin-top: 5px; position: relative; }
+        .bar-fill { height: 100%; width: 0%; transition: 0.6s ease-in-out; }
+        .bar-label { position: absolute; width: 100%; text-align: center; font-size: 10px; line-height: 20px; color: white; font-weight: bold; }
 
-        /* LOGS */
-        #logs { flex-grow: 1; background: #05070a; border: 1px solid #222; padding: 15px; font-family: monospace; font-size: 12px; overflow-y: auto; color: #8b949e; border-radius: 8px; }
-        
-        .trade-btn { background: #00ff99; color: #05070a; border: none; padding: 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 18px; margin-top: 15px; }
+        /* MARKET & LOGS */
+        .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .asset-card { background: #161b22; padding: 10px; border-radius: 6px; text-align: center; border: 1px solid #222; }
+        .price { font-size: 20px; font-weight: bold; color: #f1c40f; }
+        #logs { flex-grow: 1; background: #05070a; border-radius: 6px; padding: 10px; font-family: monospace; font-size: 11px; overflow-y: auto; color: var(--text); border: 1px solid #222; }
+        .trade-btn { background: var(--accent); color: var(--bg); border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
 
-        #burnout { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; text-align: center; color: #ff0844; }
+        /* BURNOUT */
+        #burnout-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999; justify-content: center; align-items: center; text-align: center; color: var(--stress); }
     </style>
 </head>
 <body>
 
-<div id="burnout">
-    <div><h1>⚠️ SYSTEM OVERLOAD ⚠️</h1><p>Stress limitini keçdiniz. 5 saniyə istirahət edin...</p></div>
+<div id="burnout-overlay">
+    <div><i style="font-size: 50px;">⚠️</i><h1>COGNITIVE OVERLOAD</h1><p>Stress 95% keçdi. Məcburi fasilə tətbiq olunur...</p></div>
 </div>
 
 <div class="dashboard">
     <div class="panel">
-        <h2 style="color:#4facfe">Condition</h2>
-        <div class="mode-buttons">
-            <button class="btn active" onclick="changeMode('zen', this)">ZEN</button>
-            <button class="btn" onclick="changeMode('sleep', this)">NO SLEEP</button>
-            <button class="btn" onclick="changeMode('caffeine', this)">CAFFEINE</button>
+        <h3><i class="fas fa-brain"></i> Human Condition</h3>
+        <div class="mode-row">
+            <button class="btn active" onclick="setMode('zen', this)">ZEN MODE</button>
+            <button class="btn" onclick="setMode('tired', this)">NO SLEEP</button>
+            <button class="btn" onclick="setMode('caffeine', this)">CAFFEINE</button>
         </div>
 
-        <p>CORTISOL (Stress)</p>
-        <div class="bar-container">
-            <div id="c-bar" class="bar-fill" style="background:#ff0844"></div>
-            <div id="c-txt" class="bar-label">0%</div>
+        <div id="brain-box">
+            <svg id="brain-svg" viewBox="0 0 200 150">
+                <path id="brain-path" d="M100,20 C60,20 30,50 30,90 C30,120 60,140 100,140 C140,140 170,120 170,90 C170,50 140,20 100,20" fill="none" stroke="#30363d" stroke-width="3" />
+                <circle id="amygdala" cx="100" cy="90" r="7" fill="#30363d" />
+                <ellipse id="pfc" cx="130" cy="50" rx="15" ry="10" fill="rgba(0, 255, 153, 0.1)" />
+            </svg>
+            <div id="brain-status" style="position:absolute; bottom:5px; font-size:9px; color:var(--logic);">STATUS: STABLE</div>
         </div>
 
-        <p>DOPAMINE (Reward)</p>
-        <div class="bar-container">
-            <div id="d-bar" class="bar-fill" style="background:#f1c40f"></div>
-            <div id="d-txt" class="bar-label">0%</div>
-        </div>
+        <p style="font-size:11px; margin:5px 0;">CORTISOL (Stress)</p>
+        <div class="bar-container"><div id="c-bar" class="bar-fill" style="background:var(--stress)"></div><div id="c-pct" class="bar-label">0%</div></div>
 
-        <div class="card" style="margin-top: 20px;">
-            <small>FEAR & GREED</small>
-            <div id="fg-index" style="font-size: 24px; font-weight: bold;">NEUTRAL</div>
+        <p style="font-size:11px; margin:15px 0 5px 0;">DOPAMINE (Reward)</p>
+        <div class="bar-container"><div id="d-bar" class="bar-fill" style="background:#f1c40f"></div><div id="d-pct" class="bar-label">0%</div></div>
+
+        <div class="asset-card" style="margin-top:20px;">
+            <small>FEAR & GREED INDEX</small>
+            <div id="fg-val" style="font-size:24px; font-weight:bold;">NEUTRAL</div>
         </div>
     </div>
 
     <div class="panel">
-        <div class="asset-row">
-            <div class="card"><small>GOLD</small><div id="p-gold" class="val">2375.00</div></div>
-            <div class="card"><small>OIL</small><div id="p-oil" class="val">81.50</div></div>
-            <div class="card"><small>USD/AZN</small><div class="val">1.7000</div></div>
+        <div class="asset-grid">
+            <div class="asset-card"><small>GOLD (XAU)</small><div id="p-gold" class="price">2375.00</div></div>
+            <div class="asset-card"><small>BRENT OIL</small><div id="p-oil" class="price" style="color:var(--logic)">82.40</div></div>
         </div>
-        
-        <div style="flex-grow:1; border:1px dashed #333; display:flex; align-items:center; justify-content:center; color:#333; position:relative;">
-            <canvas id="miniChart" style="width:100%; height:100%;"></canvas>
-            <div style="position:absolute; bottom:10px; font-size:12px;">Market Terminal Live Feed</div>
+        <div style="flex-grow:1; position:relative; background:#05070a; border-radius:8px; border:1px solid #222;">
+            <canvas id="marketChart"></canvas>
         </div>
     </div>
 
     <div class="panel">
-        <h2 style="color:#4facfe">Decision Log</h2>
+        <h3><i class="fas fa-terminal"></i> Decision Lab (Live Logs)</h3>
         <div id="logs"></div>
-        <button class="trade-btn" onclick="makeTrade()">EXECUTE TRADE</button>
+        <button class="trade-btn" onclick="executeTrade()">EXECUTE TRADE</button>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    let gold = 2375, oil = 81.5, cort = 15, dop = 20, mode = 'zen', isLocked = false;
-    let chartPrices = Array(20).fill(2375);
+    let gold = 2375, oil = 82.4, cort = 15, dop = 20, mode = 'zen', isLocked = false;
+    let prices = Array(20).fill(2375);
 
-    // Qrafik Parametrləri
-    const ctx = document.getElementById('miniChart').getContext('2d');
+    const ctx = document.getElementById('marketChart').getContext('2d');
     const chart = new Chart(ctx, {
         type: 'line',
-        data: { labels: chartPrices.map(()=>""), datasets: [{ data: chartPrices, borderColor: '#00ff99', borderWidth: 3, pointRadius: 0, fill: true, backgroundColor: 'rgba(0,255,153,0.1)' }] },
+        data: { labels: prices.map(()=>""), datasets: [{ data: prices, borderColor: '#00ff99', borderWidth: 2, pointRadius: 0, fill: true, backgroundColor: 'rgba(0,255,153,0.05)', tension: 0.4 }] },
         options: { responsive: true, maintainAspectRatio: false, scales: { x:{display:false}, y:{display:false} }, plugins: {legend:{display:false}} }
     });
 
-    function changeMode(m, btn) {
+    function setMode(m, btn) {
         mode = m;
         document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         addLog(`System: Mode switched to ${m.toUpperCase()}`);
     }
 
-    function engine() {
+    function update() {
         if(isLocked) return;
 
         let move = (Math.random() - 0.5) * 10;
-        gold += move; oil += (Math.random() - 0.5) * 1.2;
+        gold += move; oil += (Math.random() - 0.5) * 1.5;
 
-        // Məntiq
-        let factor = (mode === 'sleep' ? 2.8 : (mode === 'zen' ? 0.4 : 1));
-        if(move < -3.5) cort = Math.min(cort + (5 * factor), 100);
+        // BIOLOGY LOGIC
+        let mult = (mode === 'tired' ? 2.5 : (mode === 'zen' ? 0.5 : 1));
+        if(move < -4) cort = Math.min(cort + (6 * mult), 100);
         else cort = Math.max(cort - 1.2, 10);
 
-        // Vizual Yeniləmə
+        // UI UPDATES
         document.getElementById('p-gold').innerText = gold.toFixed(2);
         document.getElementById('p-oil').innerText = oil.toFixed(2);
         document.getElementById('c-bar').style.width = cort + "%";
-        document.getElementById('c-txt').innerText = Math.round(cort) + "%";
+        document.getElementById('c-pct').innerText = Math.round(cort) + "%";
         document.getElementById('d-bar').style.width = dop + "%";
-        document.getElementById('d-txt').innerText = Math.round(dop) + "%";
+        document.getElementById('d-pct').innerText = Math.round(dop) + "%";
 
-        // Fear/Greed
-        let fg = document.getElementById('fg-index');
-        if(cort > 65) { fg.innerText = "FEAR"; fg.style.color = "#ff0844"; }
-        else if(dop > 70) { fg.innerText = "GREED"; fg.style.color = "#f1c40f"; }
-        else { fg.innerText = "NEUTRAL"; fg.style.color = "#4facfe"; }
+        // BRAIN VISUALS
+        const amy = document.getElementById('amygdala');
+        const bPath = document.getElementById('brain-path');
+        const bStatus = document.getElementById('brain-status');
 
-        // Burnout
-        if(cort >= 96) {
-            isLocked = true;
-            document.getElementById('burnout').style.display = 'flex';
-            setTimeout(() => { isLocked = false; cort = 30; document.getElementById('burnout').style.display = 'none'; }, 5000);
+        if(cort > 65) {
+            amy.classList.add('amygdala-pulse');
+            bPath.setAttribute('stroke', '#ff0844');
+            bStatus.innerText = "STATUS: AMYGDALA HIJACK (PANIC)";
+            bStatus.style.color = "#ff0844";
+            document.getElementById('fg-val').innerText = "FEAR";
+            document.getElementById('fg-val').style.color = "#ff0844";
+        } else {
+            amy.classList.remove('amygdala-pulse');
+            amy.setAttribute('fill', '#4facfe');
+            bPath.setAttribute('stroke', '#30363d');
+            bStatus.innerText = "STATUS: RATIONAL (PFC CONTROL)";
+            bStatus.style.color = "#00ff99";
+            document.getElementById('fg-val').innerText = dop > 70 ? "GREED" : "NEUTRAL";
+            document.getElementById('fg-val').style.color = dop > 70 ? "#f1c40f" : "#4facfe";
         }
 
-        chartPrices.push(gold); chartPrices.shift(); chart.update('none');
+        // BURNOUT
+        if(cort >= 96) {
+            isLocked = true;
+            document.getElementById('burnout-overlay').style.display = 'flex';
+            setTimeout(() => { isLocked = false; cort = 30; document.getElementById('burnout-overlay').style.display = 'none'; }, 5000);
+        }
+
+        prices.push(gold); prices.shift(); chart.update('none');
     }
 
-    function makeTrade() {
+    function executeTrade() {
         if(isLocked) return;
         dop = Math.min(dop + 15, 100);
-        let status = cort > 70 ? "<span style='color:#ff0844'>[PANIC DETECTED!]</span>" : (dop > 75 ? "<span style='color:#f1c40f'>[RISKY MOVE!]</span>" : "[RATIONAL]");
-        addLog(`Trade: $${gold.toFixed(2)} ${status}`);
-        setTimeout(() => { dop = Math.max(dop - 8, 20); }, 2500);
+        let status = cort > 65 ? "<span style='color:#ff0844'>[PANIC DETECTED!]</span>" : (dop > 75 ? "<span style='color:#f1c40f'>[RISKY MOVE!]</span>" : "<span style='color:#00ff99'>[RATIONAL]</span>");
+        addLog(`Trade: Gold @ $${gold.toFixed(2)} ${status}`);
+        setTimeout(() => { dop = Math.max(dop - 10, 20); }, 3000);
     }
 
     function addLog(msg) {
         let box = document.getElementById('logs');
         let d = document.createElement('div');
-        d.innerHTML = `[${new Date().toLocaleTimeString().split(' ')[0]}] ${msg}`;
+        d.style.marginBottom = "5px";
+        d.innerHTML = `<span style="color:#4facfe">[${new Date().toLocaleTimeString().split(' ')[0]}]</span> ${msg}`;
         box.prepend(d);
     }
 
-    setInterval(engine, 1500);
+    setInterval(update, 1500);
 </script>
 </body>
 </html>
