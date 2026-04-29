@@ -17,9 +17,10 @@ body {
 #brain-container.panic #amygdala { fill: #ff0844 !important; animation: pulse 0.5s infinite; }
 #brain-container.panic #brain-text { color: #ff0844; }
 
-@keyframes pulse {
-  0% { r: 15; opacity: 1; }
-  100% { r: 35; opacity: 0.5; }
+@keyframes @keyframes dopaminePulse {
+  0% { box-shadow: 0 0 5px #f1c40f; }
+  50% { box-shadow: 0 0 25px #f1c40f; }
+  100% { box-shadow: 0 0 5px #f1c40f; }
 }
 
 /* Qiymət və Dashboard Dizaynı */
