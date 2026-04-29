@@ -2,167 +2,184 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <title>Multi-Asset Neuro Terminal</title>
+    <title>Neuro-Finance Cognitive Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background: #05070a; color: #00ff99; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; overflow: hidden; }
-        .dashboard { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 15px; height: 95vh; }
-        .panel { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; }
+        .dashboard { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 15px; height: 92vh; }
+        .panel { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; position: relative; }
         
-        /* MULTI-ASSET TICKER */
-        .ticker-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .ticker-card { background: #161b22; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #21262d; }
-        .ticker-name { font-size: 10px; color: #8b949e; text-transform: uppercase; }
-        .ticker-price { font-size: 18px; font-weight: bold; color: #f1c40f; margin: 5px 0; }
-        .ticker-change { font-size: 10px; }
+        /* BRAIN HEATMAP EFFEKTI */
+        #brain-viz { height: 180px; position: relative; display: flex; justify-content: center; }
+        .brain-bg { fill: #161b22; stroke: #30363d; stroke-width: 2; transition: 0.5s; }
+        .active-alert { animation: glow 1s infinite alternate; }
+        @keyframes glow { from { filter: drop-shadow(0 0 2px #ff0844); } to { filter: drop-shadow(0 0 10px #ff0844); } }
 
-        /* BIOLOGY SECTION */
-        .bio-stat { margin-bottom: 15px; }
-        .bar-wrap { background: #161b22; height: 20px; border-radius: 10px; overflow: hidden; border: 1px solid #30363d; position: relative; }
-        .bar-inner { height: 100%; transition: 0.5s; width: 0%; }
-        .bar-label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+        /* LIVE NEWS TICKER */
+        .news-ticker { 
+            position: fixed; bottom: 0; left: 0; width: 100%; background: #161b22; 
+            border-top: 1px solid #333; padding: 5px; font-size: 12px; color: #f1c40f;
+            white-space: nowrap; overflow: hidden;
+        }
+        .news-content { display: inline-block; animation: marquee 20s linear infinite; }
+        @keyframes marquee { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
 
-        /* CHART & LOG */
-        #mainChart { flex-grow: 1; max-height: 200px; }
-        .log-box { background: #05070a; border-radius: 5px; flex-grow: 1; padding: 10px; font-family: monospace; font-size: 11px; overflow-y: auto; color: #8b949e; }
+        /* HORMONES WITH PERCENTAGE */
+        .stat-row { margin-bottom: 20px; }
+        .progress-container { background: #161b22; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 5px; }
+        .progress-fill { height: 100%; transition: 0.6s ease-in-out; width: 0%; }
+
+        /* MARKET METRICS */
+        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .metric-card { background: #05070a; padding: 10px; border-radius: 6px; border: 1px solid #21262d; text-align: center; }
         
-        .btn-exec { background: #00ff99; color: #05070a; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
-        .btn-exec:hover { filter: brightness(1.2); box-shadow: 0 0 15px rgba(0,255,153,0.3); }
-
-        #burnout { display: none; position: fixed; inset: 0; background: rgba(255,0,0,0.3); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; color: white; text-align: center; font-size: 24px; }
+        .btn-trade { 
+            background: #00ff99; color: #05070a; border: none; padding: 15px; 
+            border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: auto;
+        }
+        
+        #burnout-mask { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; text-align: center; color: #ff0844; }
     </style>
 </head>
 <body>
 
-<div id="burnout">⚠️ BRAIN OVERLOAD ⚠️<br><small>Həddindən artıq stress! 5 saniyə gözləyin...</small></div>
+<div id="burnout-mask">
+    <div><i class="fas fa-brain fa-3x"></i><h1>COGNITIVE OVERLOAD</h1><p>Beyin həddindən artıq yüklənib. Sistem bərpa olunur...</p></div>
+</div>
 
 <div class="dashboard">
     <div class="panel">
-        <h3 style="font-size:14px;"><i class="fas fa-brain"></i> Neuro-Biological Status</h3>
+        <h3 style="font-size:14px; color:#4facfe;"><i class="fas fa-microscope"></i> Cognitive Load</h3>
+        <div id="brain-viz">
+            <svg viewBox="0 0 200 150" width="160">
+                <path id="brain-shape" class="brain-bg" d="M100,20 C50,20 20,60 20,90 C20,120 50,140 100,140 C150,140 180,120 180,90 C180,60 150,20 100,20" />
+                <circle id="amygdala-core" cx="100" cy="90" r="10" fill="#30363d" />
+            </svg>
+        </div>
+
+        <div class="stat-row">
+            <div style="display:flex; justify-content:space-between; font-size:11px;"><span>CORTISOL (Stress)</span><span id="cort-num">0%</span></div>
+            <div class="progress-container"><div id="cort-bar" class="progress-fill" style="background: #ff0844; box-shadow: 0 0 10px #ff0844;"></div></div>
+        </div>
+
+        <div class="stat-row">
+            <div style="display:flex; justify-content:space-between; font-size:11px;"><span>DOPAMINE (Reward)</span><span id="dop-num">0%</span></div>
+            <div class="progress-container"><div id="dop-bar" class="progress-fill" style="background: #f1c40f; box-shadow: 0 0 10px #f1c40f;"></div></div>
+        </div>
         
-        <div class="bio-stat">
-            <div class="bar-label"><span>KORTİZOL (Stress)</span><span id="cort-val">15%</span></div>
-            <div class="bar-wrap"><div id="cort-bar" class="bar-inner" style="background: #ff0844;"></div></div>
-        </div>
-
-        <div class="bio-stat">
-            <div class="bar-label"><span>DOPAMİN (Reward)</span><span id="dop-val">20%</span></div>
-            <div class="bar-wrap"><div id="dop-bar" class="bar-inner" style="background: #f1c40f;"></div></div>
-        </div>
-
-        <div style="text-align: center; margin-top: 20px;">
-            <div style="font-size: 10px; color: #8b949e;">AMYGDALA STATE</div>
-            <div id="amy-status" style="font-size: 18px; font-weight: bold; color: #4facfe;">STABLE</div>
+        <div style="font-size: 10px; color: #8b949e; text-align: center;">
+            Decision Mode: <span id="decision-mode" style="color: #00ff99;">RATIONAL</span>
         </div>
     </div>
 
     <div class="panel">
-        <div class="ticker-grid">
-            <div class="ticker-card">
-                <div class="ticker-name">Qızıl (XAU)</div>
-                <div id="gold-price" class="ticker-price">2375.40</div>
-                <div class="ticker-change" style="color:#00ff99">+0.12%</div>
-            </div>
-            <div class="ticker-card">
-                <div class="ticker-name">Neft (Brent)</div>
-                <div id="oil-price" class="ticker-price">85.20</div>
-                <div class="ticker-change" style="color:#ff0844">-0.05%</div>
-            </div>
-            <div class="ticker-card">
-                <div class="ticker-name">USD / AZN</div>
-                <div id="usd-azn" class="ticker-price">1.7000</div>
-                <div class="ticker-change">Sabit</div>
-            </div>
+        <div class="metric-grid">
+            <div class="metric-card"><small style="color:#8b949e">GOLD (XAU)</small><div id="price-gold" style="font-size:20px; font-weight:bold; color:#f1c40f;">2380.00</div></div>
+            <div class="metric-card"><small style="color:#8b949e">BRENT OIL</small><div id="price-oil" style="font-size:20px; font-weight:bold; color:#4facfe;">82.50</div></div>
         </div>
-
-        <canvas id="mainChart"></canvas>
         
-        <div style="text-align: center; margin-top: 15px;">
-            <div style="font-size: 10px; color: #8b949e;">FEAR & GREED INDEX</div>
-            <div id="fg-index" style="font-size: 22px; font-weight: bold; color: #4facfe;">NEUTRAL</div>
+        <canvas id="liveChart"></canvas>
+
+        <div style="margin-top: 15px; text-align: center;">
+            <div style="font-size: 10px; color: #8b949e;">MARKET SENTIMENT (FEAR & GREED)</div>
+            <div id="sentiment-text" style="font-size: 20px; font-weight: bold;">NEUTRAL</div>
         </div>
     </div>
 
     <div class="panel">
-        <h3 style="font-size:14px;"><i class="fas fa-microchip"></i> Decision Lab</h3>
-        <button class="btn-exec" onclick="trade()">EXECUTE TRADE</button>
-        
-        <div style="margin-top: 15px; font-size: 11px; color: #4facfe;">> EMOTIONAL LOG</div>
-        <div class="log-box" id="logs"></div>
+        <h3 style="font-size:14px; color:#4facfe;"><i class="fas fa-history"></i> Execution History</h3>
+        <div id="trade-logs" style="flex-grow:1; font-family:monospace; font-size:11px; overflow-y:auto; color:#8b949e;"></div>
+        <button class="btn-trade" onclick="executeTrade()">EXECUTE STRATEGY</button>
+    </div>
+</div>
+
+<div class="news-ticker">
+    <div class="news-content" id="news-text">
+        +++ BREAKING: FED sədri inflyasiya gözləntilərini açıqladı... +++ BRENT nefti 82 dollara düşdü... +++ Texnologiya sektorunda yüksəliş davam edir... +++
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    let gold = 2375.40, oil = 85.20, cort = 15, dop = 20, isBurnout = false;
-    let history = Array(20).fill(2375);
+    let gold = 2380, oil = 82.5, cort = 15, dop = 20, isLocked = false;
+    let chartData = Array(20).fill(2380);
 
-    const ctx = document.getElementById('mainChart').getContext('2d');
-    const chart = new Chart(ctx, {
+    const chart = new Chart(document.getElementById('liveChart'), {
         type: 'line',
-        data: { labels: history.map(()=>""), datasets: [{ data: history, borderColor: '#f1c40f', borderWidth: 2, pointRadius: 0, fill: true, backgroundColor: 'rgba(241,196,15,0.05)', tension: 0.4 }] },
+        data: { labels: chartData.map(()=>""), datasets: [{ data: chartData, borderColor: '#00ff99', borderWidth: 2, pointRadius: 0, fill: true, backgroundColor: 'rgba(0,255,153,0.05)' }] },
         options: { responsive: true, maintainAspectRatio: false, scales: { x:{display:false}, y:{display:false} }, plugins: {legend:{display:false}} }
     });
 
-    function update() {
-        if(isBurnout) return;
+    function updateLogic() {
+        if(isLocked) return;
 
-        // Qiymət Hərəkətləri
-        let goldMove = (Math.random() - 0.5) * 8;
+        let goldMove = (Math.random() - 0.5) * 10;
         gold += goldMove;
-        oil += (Math.random() - 0.5) * 1.2;
+        oil += (Math.random() - 0.5) * 1.5;
 
-        // Stress Məntiqi (Qızıl düşəndə stress artır)
-        if(goldMove < -3) {
-            cort = Math.min(cort + 10, 100);
+        // Faktorların təsiri
+        if(goldMove < -4) { 
+            cort = Math.min(cort + 12, 100); 
+            updateNews("ALERT: Bazar kəskin şəkildə düşür! Stress səviyyəsi artır...");
         } else {
-            cort = Math.max(cort - 1, 10);
+            cort = Math.max(cort - 1.5, 10);
         }
 
         // Vizual Yeniləmə
-        document.getElementById('gold-price').innerText = gold.toFixed(2);
-        document.getElementById('oil-price').innerText = oil.toFixed(2);
+        document.getElementById('price-gold').innerText = gold.toFixed(2);
+        document.getElementById('price-oil').innerText = oil.toFixed(2);
         document.getElementById('cort-bar').style.width = cort + "%";
-        document.getElementById('cort-val').innerText = cort + "%";
+        document.getElementById('cort-num').innerText = Math.round(cort) + "%";
         document.getElementById('dop-bar').style.width = dop + "%";
-        document.getElementById('dop-val').innerText = dop + "%";
+        document.getElementById('dop-num').innerText = Math.round(dop) + "%";
 
-        // Vəziyyət İndikatorları
+        // Brain Heatmap Logic
+        let brain = document.getElementById('brain-shape');
+        let amygdala = document.getElementById('amygdala-core');
         if(cort > 60) {
-            document.getElementById('amy-status').innerText = "HYPER-ACTIVE";
-            document.getElementById('amy-status').style.color = "#ff0844";
-            document.getElementById('fg-index').innerText = "EXTREME FEAR";
-            document.getElementById('fg-index').style.color = "#ff0844";
+            brain.style.fill = `rgba(255, 8, 68, ${cort/150})`;
+            amygdala.setAttribute('fill', '#ff0844');
+            amygdala.classList.add('active-alert');
+            document.getElementById('decision-mode').innerText = "EMOTIONAL (Panic)";
+            document.getElementById('decision-mode').style.color = "#ff0844";
+            document.getElementById('sentiment-text').innerText = "EXTREME FEAR";
+            document.getElementById('sentiment-text').style.color = "#ff0844";
         } else {
-            document.getElementById('amy-status').innerText = "STABLE";
-            document.getElementById('amy-status').style.color = "#4facfe";
-            document.getElementById('fg-index').innerText = dop > 60 ? "GREED" : "NEUTRAL";
-            document.getElementById('fg-index').style.color = dop > 60 ? "#f1c40f" : "#4facfe";
+            brain.style.fill = "#161b22";
+            amygdala.setAttribute('fill', '#30363d');
+            amygdala.classList.remove('active-alert');
+            document.getElementById('decision-mode').innerText = "RATIONAL";
+            document.getElementById('decision-mode').style.color = "#00ff99";
+            document.getElementById('sentiment-text').innerText = dop > 65 ? "GREED" : "NEUTRAL";
+            document.getElementById('sentiment-text').style.color = dop > 65 ? "#f1c40f" : "#4facfe";
         }
 
-        if(cort >= 98) {
-            isBurnout = true;
-            document.getElementById('burnout').style.display = 'flex';
-            setTimeout(() => { isBurnout = false; cort = 30; document.getElementById('burnout').style.display = 'none'; }, 5000);
-        }
+        if(cort >= 98) triggerBurnout();
 
-        history.push(gold);
-        history.shift();
+        chartData.push(gold); chartData.shift();
         chart.update('none');
     }
 
-    function trade() {
-        if(isBurnout) return;
-        dop = Math.min(dop + 15, 100);
-        let log = document.getElementById('logs');
-        let entry = document.createElement('div');
-        let status = cort > 60 ? "<span style='color:#ff0844'>[PANIC]</span>" : "<span style='color:#00ff99'>[ZEN]</span>";
-        entry.innerHTML = `[${new Date().toLocaleTimeString()}] Gold: $${gold.toFixed(2)} ${status}`;
-        log.prepend(entry);
-        setTimeout(() => { dop = Math.max(dop - 5, 10); }, 3000);
+    function updateNews(msg) {
+        document.getElementById('news-text').innerText = "+++ " + msg + " +++ " + document.getElementById('news-text').innerText.substring(0, 100);
     }
 
-    setInterval(update, 1500);
+    function triggerBurnout() {
+        isLocked = true;
+        document.getElementById('burnout-mask').style.display = 'flex';
+        setTimeout(() => { isLocked = false; cort = 25; document.getElementById('burnout-mask').style.display = 'none'; }, 5000);
+    }
+
+    function executeTrade() {
+        if(isLocked) return;
+        dop = Math.min(dop + 18, 100);
+        let log = document.getElementById('trade-logs');
+        let status = cort > 60 ? "<span style='color:#ff0844'>[PANIC EXECUTION]</span>" : "<span style='color:#00ff99'>[STRATEGIC BUY]</span>";
+        log.innerHTML = `<div>[${new Date().toLocaleTimeString()}] Gold: $${gold.toFixed(2)} ${status}</div>` + log.innerHTML;
+        setTimeout(() => { dop = Math.max(dop - 5, 15); }, 3000);
+    }
+
+    setInterval(updateLogic, 1500);
 </script>
 </body>
 </html>
