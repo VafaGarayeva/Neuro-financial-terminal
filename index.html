@@ -2,236 +2,179 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuro-Financial Ultimate Terminal</title>
+    <title>Neuro-Finance Pro Terminal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* RETRO TERMINAL FEEL */
-        body {
-            background-color: #0b0e14;
-            color: #00ff99;
-            font-family: 'Courier New', monospace;
-            margin: 0; padding: 20px;
-            overflow: hidden;
-            display: flex; justify-content: center; align-items: center; height: 100vh;
+        body { background: #05070a; color: #00ff99; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; overflow: hidden; }
+        
+        .dashboard { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 20px; height: 95vh; }
+        .panel { background: #0d1117; border: 1px solid #30363d; border-radius: 15px; padding: 20px; display: flex; flex-direction: column; position: relative; }
+
+        /* 1. NEON HORMON BARLARI */
+        .hormone-bar-container { margin-bottom: 25px; }
+        .bar-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; font-weight: bold; }
+        .bar-bg { background: #161b22; height: 25px; border-radius: 12px; overflow: hidden; border: 1px solid #30363d; position: relative; }
+        .bar-fill { height: 100%; transition: width 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67); position: relative; }
+        .bar-percent { position: absolute; right: 10px; top: 2px; color: white; font-size: 12px; font-weight: bold; text-shadow: 0 0 5px #000; }
+
+        #cortisol-fill { background: linear-gradient(90deg, #ff0844, #ffb199); box-shadow: 0 0 15px rgba(255, 8, 68, 0.5); }
+        #dopamine-fill { background: linear-gradient(90deg, #f1c40f, #ffeead); box-shadow: 0 0 15px rgba(241, 196, 15, 0.5); }
+
+        /* 2. BEYİN VƏ PFC MODULU */
+        #brain-map { height: 220px; position: relative; text-align: center; }
+        .brain-part { transition: 0.5s; }
+        #pfc-status { font-size: 10px; color: #4facfe; position: absolute; top: 10px; left: 10px; border: 1px solid #4facfe; padding: 5px; border-radius: 5px; }
+
+        /* 3. MARKET & LOG */
+        .price-hero { text-align: center; background: #161b22; padding: 20px; border-radius: 12px; margin-bottom: 15px; }
+        .price-val { font-size: 35px; font-weight: bold; color: #f1c40f; }
+        
+        .btn-trade { 
+            background: #00ff99; color: #05070a; border: none; padding: 20px; 
+            border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 0 20px rgba(0, 255, 153, 0.2);
         }
+        .btn-trade:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 255, 153, 0.4); }
 
-        /* Scanline Effect */
-        body::after {
-            content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-            z-index: 9999; background-size: 100% 2px, 3px 100%; pointer-events: none;
-        }
+        /* 4. LOGS */
+        .log-container { background: #05070a; border-radius: 8px; flex-grow: 1; padding: 10px; font-family: 'Courier New', monospace; font-size: 11px; overflow-y: auto; }
+        .log-item { border-left: 2px solid #30363d; padding-left: 10px; margin-bottom: 8px; }
 
-        .dashboard { 
-            display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 25px; 
-            width: 100%; max-width: 1400px; height: 85vh;
-        }
-
-        .panel { 
-            background: rgba(16, 20, 28, 0.95); border: 1px solid #333; 
-            padding: 20px; border-radius: 12px; position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column;
-        }
-
-        h3 { border-bottom: 1px solid #222; padding-bottom: 10px; margin-top: 0; font-size: 16px; color: #4facfe; }
-
-        /* MODE SELECTOR */
-        .mode-selector { display: flex; gap: 8px; margin-bottom: 20px; }
-        .mode-btn { 
-            flex: 1; padding: 10px; font-size: 10px; border: 1px solid #444; background: #1a1a1a; 
-            color: #888; cursor: pointer; transition: 0.3s; border-radius: 4px;
-        }
-        .mode-btn.active { background: #4facfe; color: #000; border-color: #4facfe; box-shadow: 0 0 15px rgba(79, 172, 254, 0.4); }
-
-        /* GAUGES */
-        .gauge-container { display: flex; justify-content: space-around; margin-top: auto; padding-bottom: 10px; }
-        .gauge { width: 100px; height: 50px; position: relative; overflow: hidden; }
-        .gauge-body { width: 100px; height: 100px; background: #222; border-radius: 50%; position: absolute; }
-        .gauge-fill { width: 100%; height: 100%; background: #00ff99; transform-origin: center center; transform: rotate(0.08turn); transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        .gauge-cover { width: 84%; height: 84%; background: #10141c; border-radius: 50%; position: absolute; top: 8%; left: 8%; }
-
-        /* MARKET SECTION */
-        .price-display { display: flex; justify-content: space-between; margin-bottom: 20px; background: #05070a; padding: 15px; border-radius: 8px; }
-        .price-val { font-size: 26px; color: #f1c40f; text-shadow: 0 0 10px rgba(241, 196, 15, 0.3); }
-
-        #fear-greed-box { 
-            text-align: center; padding: 20px; margin: 15px 0; border: 1px dashed #444; border-radius: 8px;
-        }
-        .index-title { font-size: 10px; color: #888; letter-spacing: 2px; }
-        .index-val { font-size: 24px; font-weight: bold; margin-top: 5px; }
-
-        /* LOGS */
-        .trade-log { flex-grow: 1; overflow-y: auto; font-size: 11px; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; }
-        #log-list { padding: 0; margin: 0; }
-        #log-list li { padding: 8px 5px; border-bottom: 1px solid #1a1a1a; list-style: none; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
-
-        /* BUTTON */
-        .btn { 
-            width: 100%; padding: 18px; background: #00ff99; color: #000; border: none; 
-            cursor: pointer; font-weight: bold; font-size: 15px; border-radius: 6px;
-            box-shadow: 0 4px 0 #009966; transition: 0.1s;
-        }
-        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #009966; }
-
-        /* BURNOUT */
-        #burnout-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 8, 68, 0.3); backdrop-filter: blur(12px);
-            z-index: 10000; justify-content: center; align-items: center;
-            color: #fff; font-size: 32px; font-weight: bold; text-align: center;
-        }
+        /* OVERLAYS */
+        #burnout { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,0,0,0.4); backdrop-filter: blur(10px); z-index:100; justify-content: center; align-items: center; color: white; flex-direction: column; }
     </style>
 </head>
 <body>
 
-<div id="burnout-overlay">
-    <div>
-        <i class="fas fa-exclamation-triangle"></i><br>
-        SYSTEM OVERLOAD<br>
-        <span style="font-size:16px; font-weight: normal; color: #ffb3b3;">Neural fatigue detected. Forced 5s reset...</span>
-    </div>
+<div id="burnout">
+    <h1>⚠️ BRAIN BURNOUT ⚠️</h1>
+    <p>Neural circuits overloaded. System cooling down...</p>
 </div>
 
 <div class="dashboard">
     <div class="panel">
-        <h3><i class="fas fa-brain"></i> Neural Condition</h3>
-        <div class="mode-selector">
-            <button class="mode-btn active" onclick="setMode('zen', this)">ZEN</button>
-            <button class="mode-btn" onclick="setMode('tired', this)">TIRED</button>
-            <button class="mode-btn" onclick="setMode('caffeine', this)">CAFFEINE</button>
-        </div>
+        <h3><i class="fas fa-microscope"></i> Neural Biology</h3>
         
-        <svg id="brain-svg" viewBox="0 0 600 500" style="height: 200px;">
-            <path id="brain-path" d="M300,50 C150,50 50,150 50,250 C50,350 150,450 300,450 C450,450 550,350 550,250 C550,150 450,50 300,50 Z" fill="none" stroke="#4facfe" stroke-width="8"/>
-            <circle id="amygdala" cx="300" cy="280" r="20" fill="#4facfe" />
-        </svg>
+        <div id="brain-map">
+            <div id="pfc-status">PFC: ACTIVE (Logic On)</div>
+            <svg viewBox="0 0 200 150" width="100%" height="100%">
+                <path d="M100,20 C50,20 20,60 20,90 C20,120 50,140 100,140 C150,140 180,120 180,90 C180,60 150,20 100,20" fill="none" stroke="#30363d" stroke-width="2"/>
+                <circle id="pfc-light" cx="60" cy="50" r="8" fill="#4facfe" class="brain-part" />
+                <circle id="amygdala-light" cx="100" cy="90" r="12" fill="#30363d" class="brain-part" />
+            </svg>
+        </div>
 
-        <div class="gauge-container">
-            <div class="gauge"><div class="gauge-body"><div id="cort-fill" class="gauge-fill" style="background:#ff0844"></div></div><div class="gauge-cover"></div><small style="position:absolute; bottom:-15px; width:100%; text-align:center; font-size:9px;">Cortisol</small></div>
-            <div class="gauge"><div class="gauge-body"><div id="dop-fill" class="gauge-fill" style="background:#f1c40f"></div></div><div class="gauge-cover"></div><small style="position:absolute; bottom:-15px; width:100%; text-align:center; font-size:9px;">Dopamine</small></div>
+        <div class="hormone-bar-container">
+            <div class="bar-label"><span>KORTİZOL (Stress)</span><span id="cort-text">10%</span></div>
+            <div class="bar-bg"><div id="cortisol-fill" class="bar-fill" style="width: 10%;"></div><span class="bar-percent" id="cort-pct">10%</span></div>
+        </div>
+
+        <div class="hormone-bar-container">
+            <div class="bar-label"><span>DOPAMİN (Reward)</span><span id="dop-text">15%</span></div>
+            <div class="bar-bg"><div id="dopamine-fill" class="bar-fill" style="width: 15%;"></div><span class="bar-percent" id="dop-pct">15%</span></div>
         </div>
     </div>
 
     <div class="panel">
-        <h3><i class="fas fa-chart-line"></i> Market Terminal (XAU/USD)</h3>
-        <div class="price-display">
-            <div><small style="color:#888">BID</small><div id="bid-price" class="price-val">--</div></div>
-            <div><small style="color:#888">ASK</small><div id="ask-price" class="price-val">--</div></div>
+        <h3><i class="fas fa-chart-line"></i> Market Terminal</h3>
+        <div class="price-hero">
+            <div style="font-size: 12px; color: #8b949e;">XAU/USD (Qızıl)</div>
+            <div id="price" class="price-val">2375.40</div>
+            <div id="market-status" style="font-size: 11px; margin-top: 5px;">Bazar Stabildir</div>
         </div>
         
-        <div id="fear-greed-box">
-            <div class="index-title">FEAR & GREED INDEX</div>
-            <div id="fg-index" class="index-val">NEUTRAL</div>
+        <div style="height: 150px;"><canvas id="mainChart"></canvas></div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <div style="font-size: 10px; color: #8b949e;">FEAR & GREED INDEX</div>
+            <div id="fg-index" style="font-size: 24px; font-weight: bold;">NEUTRAL</div>
         </div>
-
-        <div style="flex-grow:1; min-height: 120px;"><canvas id="priceChart"></canvas></div>
     </div>
 
     <div class="panel">
-        <h3><i class="fas fa-microchip"></i> Execution Lab</h3>
-        <button class="btn" id="trade-btn" onclick="processTrade()">EXECUTE TRADE</button>
+        <h3><i class="fas fa-terminal"></i> Execution Lab</h3>
+        <button class="btn-trade" onclick="doTrade()">EXECUTE TRADE</button>
         
-        <div class="trade-log">
-            <div style="font-size: 10px; color: #4facfe; margin-bottom: 10px;">> EMOTIONAL TRADE HISTORY</div>
-            <ul id="log-list"></ul>
-        </div>
+        <h4 style="font-size: 12px; margin-top: 20px; color: #8b949e;">EMOTIONAL LOG</h4>
+        <div class="log-container" id="logs"></div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    let goldPrice = 2370.00;
-    let cortisol = 10;
-    let dopamine = 10;
-    let currentMode = 'zen';
-    let isBurnout = false;
-    let priceHistory = Array(20).fill(2370);
+    let price = 2375.40;
+    let cort = 15;
+    let dop = 20;
+    let history = Array(20).fill(2375);
 
-    const ctx = document.getElementById('priceChart').getContext('2d');
-    const priceChart = new Chart(ctx, {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    const chart = new Chart(ctx, {
         type: 'line',
-        data: { labels: priceHistory.map(()=>""), datasets: [{ data: priceHistory, borderColor: '#f1c40f', borderWidth: 2, pointRadius: 0, fill: true, backgroundColor: 'rgba(241, 196, 15, 0.05)', tension: 0.3 }] },
+        data: { labels: history.map(()=>""), datasets: [{ data: history, borderColor: '#00ff99', borderWidth: 2, pointRadius: 0, fill: true, backgroundColor: 'rgba(0,255,153,0.05)', tension: 0.4 }] },
         options: { responsive: true, maintainAspectRatio: false, scales: { x:{display:false}, y:{display:false} }, plugins: {legend:{display:false}} }
     });
 
-    function setMode(mode, btn) {
-        currentMode = mode;
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        logAction(`Switched to ${mode.toUpperCase()} mode.`);
-    }
-
-    function updateMarket() {
-        if (isBurnout) return;
-
-        let volatility = currentMode === 'caffeine' ? 15 : 8;
-        let change = (Math.random() - 0.5) * volatility;
-        goldPrice += change;
+    function update() {
+        let change = (Math.random() - 0.5) * 15;
+        price += change;
         
-        if (change < -volatility/3) {
-            let mult = currentMode === 'tired' ? 18 : (currentMode === 'zen' ? 4 : 10);
-            cortisol = Math.min(cortisol + mult, 100);
+        // Məntiq: Qiymət çox düşəndə stress artır
+        if (change < -5) {
+            cort = Math.min(cort + 12, 100);
+            document.getElementById('market-status').innerText = "BAZAR ÇÖKÜR!";
+            document.getElementById('market-status').style.color = "#ff0844";
         } else {
-            cortisol = Math.max(cortisol - 1.5, 10);
+            cort = Math.max(cort - 2, 10);
+            document.getElementById('market-status').innerText = "Bazar Stabildir";
+            document.getElementById('market-status').style.color = "#8b949e";
         }
 
-        document.getElementById('bid-price').innerText = (goldPrice - 0.4).toFixed(2);
-        document.getElementById('ask-price').innerText = (goldPrice + 0.4).toFixed(2);
-        document.getElementById('cort-fill').style.transform = `rotate(${cortisol/200}turn)`;
-        document.getElementById('dop-fill').style.transform = `rotate(${dopamine/200}turn)`;
+        // Vizual Yeniləmə
+        document.getElementById('price').innerText = price.toFixed(2);
+        document.getElementById('cortisol-fill').style.width = cort + "%";
+        document.getElementById('cort-pct').innerText = cort + "%";
+        document.getElementById('dopamine-fill').style.width = dop + "%";
+        document.getElementById('dop-pct').innerText = dop + "%";
 
-        let fg = document.getElementById('fg-index');
-        if (cortisol > 65) { fg.innerText = "EXTREME FEAR"; fg.style.color = "#ff0844"; }
-        else if (dopamine > 70) { fg.innerText = "GREED"; fg.style.color = "#f1c40f"; }
-        else { fg.innerText = "NEUTRAL"; fg.style.color = "#4facfe"; }
-
-        if (cortisol > 60) {
-            document.getElementById('amygdala').style.fill = "#ff0844";
-            document.getElementById('brain-path').style.stroke = "#ff0844";
+        // PFC vs Amiqdala Balansı
+        if (cort > 55) {
+            document.getElementById('amygdala-light').style.fill = "#ff0844";
+            document.getElementById('pfc-light').style.fill = "#30363d";
+            document.getElementById('pfc-status').innerText = "PFC: BYPASSED (Logic Off)";
+            document.getElementById('pfc-status').style.color = "#ff0844";
+            document.getElementById('fg-index').innerText = "EXTREME FEAR";
+            document.getElementById('fg-index').style.color = "#ff0844";
         } else {
-            document.getElementById('amygdala').style.fill = "#4facfe";
-            document.getElementById('brain-path').style.stroke = "#4facfe";
+            document.getElementById('amygdala-light').style.fill = "#30363d";
+            document.getElementById('pfc-light').style.fill = "#4facfe";
+            document.getElementById('pfc-status').innerText = "PFC: ACTIVE (Logic On)";
+            document.getElementById('pfc-status').style.color = "#4facfe";
+            document.getElementById('fg-index').innerText = dop > 60 ? "GREED" : "NEUTRAL";
+            document.getElementById('fg-index').style.color = dop > 60 ? "#f1c40f" : "#4facfe";
         }
 
-        if (cortisol >= 95) triggerBurnout();
+        if (cort >= 98) {
+            document.getElementById('burnout').style.display = 'flex';
+            setTimeout(() => { cort = 30; document.getElementById('burnout').style.display = 'none'; }, 4000);
+        }
 
-        priceHistory.push(goldPrice);
-        if (priceHistory.length > 20) priceHistory.shift();
-        priceChart.update('none');
+        history.push(price);
+        history.shift();
+        chart.update('none');
     }
 
-    function triggerBurnout() {
-        isBurnout = true;
-        document.getElementById('burnout-overlay').style.display = 'flex';
-        setTimeout(() => {
-            isBurnout = false;
-            cortisol = 20;
-            document.getElementById('burnout-overlay').style.display = 'none';
-            logAction("System recovered from burnout.");
-        }, 5000);
+    function doTrade() {
+        dop = Math.min(dop + 20, 100);
+        let log = document.getElementById('logs');
+        let div = document.createElement('div');
+        div.className = 'log-item';
+        let emotion = cort > 55 ? "<span style='color:#ff0844'>[PANIC SELL]</span>" : "<span style='color:#00ff99'>[RATIONAL BUY]</span>";
+        div.innerHTML = `<b>${new Date().toLocaleTimeString()}</b>: Trade @ ${price.toFixed(2)} ${emotion} <br> <small>Dopamine: ${dop}% | Stress: ${cort}%</small>`;
+        log.prepend(div);
+        setTimeout(() => { dop = Math.max(dop - 5, 10); }, 2000);
     }
 
-    function logAction(msg) {
-        const list = document.getElementById('log-list');
-        const li = document.createElement('li');
-        li.innerHTML = `<span style="color:#555">[${new Date().toLocaleTimeString()}]</span> ${msg}`;
-        list.prepend(li);
-        if (list.children.length > 10) list.lastChild.remove();
-    }
-
-    function processTrade() {
-        if (isBurnout) return;
-        dopamine = Math.min(dopamine + 20, 100);
-        let emotion = cortisol > 60 ? "<b style='color:#ff0844'>[Panic Move!]</b>" : (dopamine > 75 ? "<b style='color:#f1c40f'>[Greed Cycle]</b>" : "<b style='color:#00ff99'>[Rational]</b>");
-        logAction(`Trade @ $${goldPrice.toFixed(2)} ${emotion}`);
-        setTimeout(() => { dopamine = Math.max(dopamine - 10, 10); }, 3000);
-    }
-
-    setInterval(updateMarket, 1500);
+    setInterval(update, 1500);
 </script>
 </body>
 </html>
