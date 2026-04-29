@@ -2,147 +2,159 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <title>Neuro-Finance Ultimate Terminal</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Neuro-Finance Fix Terminal</title>
     <style>
-        body { background: #05070a; color: #00ff99; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; overflow: hidden; height: 100vh; }
-        .dashboard { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 15px; height: 90vh; }
-        .panel { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; }
+        body { background: #05070a; color: #00ff99; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; overflow: hidden; }
+        .dashboard { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 20px; height: 90vh; }
+        .panel { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; }
         
-        /* ASSET CARDS */
-        .asset-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .asset-card { background: #161b22; padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #21262d; }
-        .asset-val { font-size: 16px; font-weight: bold; color: #f1c40f; }
+        /* ASSETS */
+        .asset-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .card { background: #161b22; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #21262d; }
+        .val { font-size: 22px; font-weight: bold; color: #f1c40f; }
 
-        /* CONDITION BUTTONS */
-        .mode-group { display: flex; gap: 5px; margin: 10px 0; }
-        .mode-btn { flex: 1; padding: 8px; font-size: 10px; border: 1px solid #333; background: #05070a; color: #8b949e; cursor: pointer; border-radius: 5px; }
-        .mode-btn.active { background: #4facfe; color: white; border-color: #4facfe; box-shadow: 0 0 10px rgba(79,172,254,0.3); }
+        /* BIOLOGY */
+        .bar-container { background: #05070a; height: 25px; border-radius: 12px; border: 1px solid #333; position: relative; margin: 10px 0; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0%; transition: 0.5s; }
+        .bar-label { position: absolute; width: 100%; text-align: center; line-height: 25px; font-size: 12px; font-weight: bold; color: #fff; }
 
-        /* GAUGES & BARS */
-        .bar-wrap { background: #05070a; height: 18px; border-radius: 9px; border: 1px solid #333; position: relative; margin-top: 5px; overflow: hidden; }
-        .bar-fill { height: 100%; transition: 0.5s; width: 0%; }
-        .bar-txt { position: absolute; right: 10px; top: 1px; font-size: 10px; color: #fff; font-weight: bold; }
-
-        .fg-gauge { background: #161b22; padding: 15px; border-radius: 10px; text-align: center; margin-top: 10px; border: 1px solid #333; }
-        #fg-index { font-size: 24px; font-weight: bold; }
+        /* MODES */
+        .mode-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn { flex: 1; padding: 10px; background: #161b22; color: #8b949e; border: 1px solid #333; cursor: pointer; border-radius: 6px; }
+        .btn.active { background: #4facfe; color: #fff; border-color: #4facfe; }
 
         /* LOGS */
-        .log-container { flex-grow: 1; background: #05070a; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11px; overflow-y: auto; color: #8b949e; border: 1px solid #222; }
+        #logs { flex-grow: 1; background: #05070a; border: 1px solid #222; padding: 15px; font-family: monospace; font-size: 12px; overflow-y: auto; color: #8b949e; border-radius: 8px; }
         
-        .btn-exec { background: #00ff99; color: #05070a; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .trade-btn { background: #00ff99; color: #05070a; border: none; padding: 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 18px; margin-top: 15px; }
 
-        #burnout-screen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; text-align: center; color: #ff0844; }
+        #burnout { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; text-align: center; color: #ff0844; }
     </style>
 </head>
 <body>
 
-<div id="burnout-screen">
-    <div><i class="fas fa-brain fa-4x"></i><h1>SYSTEM OVERLOAD: Forced Break</h1><p>Stress 95% keçdi. 5 saniyə gözləyin...</p></div>
+<div id="burnout">
+    <div><h1>⚠️ SYSTEM OVERLOAD ⚠️</h1><p>Stress limitini keçdiniz. 5 saniyə istirahət edin...</p></div>
 </div>
 
 <div class="dashboard">
     <div class="panel">
-        <h3 style="font-size:14px; color:#4facfe;">Condition & Biology</h3>
-        <div class="mode-group">
-            <button class="mode-btn active" onclick="setMode('zen', this)">Zen Mode</button>
-            <button class="mode-btn" onclick="setMode('sleep', this)">No Sleep</button>
-            <button class="mode-btn" onclick="setMode('caffeine', this)">Caffeine</button>
+        <h2 style="color:#4facfe">Condition</h2>
+        <div class="mode-buttons">
+            <button class="btn active" onclick="changeMode('zen', this)">ZEN</button>
+            <button class="btn" onclick="changeMode('sleep', this)">NO SLEEP</button>
+            <button class="btn" onclick="changeMode('caffeine', this)">CAFFEINE</button>
         </div>
 
-        <div style="margin-top:15px;">
-            <div style="display:flex; justify-content:space-between; font-size:11px;"><span>CORTISOL (Stress)</span><span id="c-num">0%</span></div>
-            <div class="bar-wrap"><div id="c-bar" class="bar-fill" style="background: #ff0844;"></div><span class="bar-txt" id="c-pct">0%</span></div>
+        <p>CORTISOL (Stress)</p>
+        <div class="bar-container">
+            <div id="c-bar" class="bar-fill" style="background:#ff0844"></div>
+            <div id="c-txt" class="bar-label">0%</div>
         </div>
 
-        <div style="margin-top:15px;">
-            <div style="display:flex; justify-content:space-between; font-size:11px;"><span>DOPAMINE (Reward)</span><span id="d-num">0%</span></div>
-            <div class="bar-wrap"><div id="d-bar" class="bar-fill" style="background: #f1c40f;"></div><span class="bar-txt" id="d-pct">0%</span></div>
+        <p>DOPAMINE (Reward)</p>
+        <div class="bar-container">
+            <div id="d-bar" class="bar-fill" style="background:#f1c40f"></div>
+            <div id="d-txt" class="bar-label">0%</div>
         </div>
 
-        <div class="fg-gauge">
-            <div style="font-size:10px; color:#8b949e;">FEAR & GREED INDEX</div>
-            <div id="fg-index">NEUTRAL</div>
+        <div class="card" style="margin-top: 20px;">
+            <small>FEAR & GREED</small>
+            <div id="fg-index" style="font-size: 24px; font-weight: bold;">NEUTRAL</div>
         </div>
     </div>
 
     <div class="panel">
-        <div class="asset-grid">
-            <div class="asset-card"><small>GOLD</small><div id="p-gold" class="asset-val">2370.00</div></div>
-            <div class="asset-card"><small>OIL</small><div id="p-oil" class="asset-val">82.50</div></div>
-            <div class="asset-card"><small>USD/AZN</small><div class="asset-val">1.7000</div></div>
+        <div class="asset-row">
+            <div class="card"><small>GOLD</small><div id="p-gold" class="val">2375.00</div></div>
+            <div class="card"><small>OIL</small><div id="p-oil" class="val">81.50</div></div>
+            <div class="card"><small>USD/AZN</small><div class="val">1.7000</div></div>
         </div>
-        <canvas id="marketChart"></canvas>
+        
+        <div style="flex-grow:1; border:1px dashed #333; display:flex; align-items:center; justify-content:center; color:#333; position:relative;">
+            <canvas id="miniChart" style="width:100%; height:100%;"></canvas>
+            <div style="position:absolute; bottom:10px; font-size:12px;">Market Terminal Live Feed</div>
+        </div>
     </div>
 
     <div class="panel">
-        <h3 style="font-size:14px; color:#4facfe;">Dinamik Loglar</h3>
-        <div class="log-container" id="logs"></div>
-        <button class="btn-exec" onclick="trade()">EXECUTE TRADE</button>
+        <h2 style="color:#4facfe">Decision Log</h2>
+        <div id="logs"></div>
+        <button class="trade-btn" onclick="makeTrade()">EXECUTE TRADE</button>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    let gold = 2370, oil = 82.5, cort = 15, dop = 20, mode = 'zen', locked = false;
-    let hData = Array(20).fill(2370);
+    let gold = 2375, oil = 81.5, cort = 15, dop = 20, mode = 'zen', isLocked = false;
+    let chartPrices = Array(20).fill(2375);
 
-    const chart = new Chart(document.getElementById('marketChart'), {
+    // Qrafik Parametrləri
+    const ctx = document.getElementById('miniChart').getContext('2d');
+    const chart = new Chart(ctx, {
         type: 'line',
-        data: { labels: hData.map(()=>""), datasets: [{ data: hData, borderColor: '#00ff99', borderWidth: 2, pointRadius: 0, fill: true, backgroundColor: 'rgba(0,255,153,0.05)' }] },
+        data: { labels: chartPrices.map(()=>""), datasets: [{ data: chartPrices, borderColor: '#00ff99', borderWidth: 3, pointRadius: 0, fill: true, backgroundColor: 'rgba(0,255,153,0.1)' }] },
         options: { responsive: true, maintainAspectRatio: false, scales: { x:{display:false}, y:{display:false} }, plugins: {legend:{display:false}} }
     });
 
-    function setMode(m, btn) {
+    function changeMode(m, btn) {
         mode = m;
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        addLog(`System: Mode switched to ${m.toUpperCase()}`);
     }
 
-    function logic() {
-        if(locked) return;
-        let gMove = (Math.random() - 0.5) * 10;
-        gold += gMove; oil += (Math.random() - 0.5) * 1.5;
+    function engine() {
+        if(isLocked) return;
 
-        // Faktor təsiri
-        let mult = (mode === 'sleep' ? 2.5 : (mode === 'zen' ? 0.5 : 1));
-        if(gMove < -4) cort = Math.min(cort + (6 * mult), 100);
-        else cort = Math.max(cort - 1, 10);
+        let move = (Math.random() - 0.5) * 10;
+        gold += move; oil += (Math.random() - 0.5) * 1.2;
 
-        // Vizual yeniləmə
+        // Məntiq
+        let factor = (mode === 'sleep' ? 2.8 : (mode === 'zen' ? 0.4 : 1));
+        if(move < -3.5) cort = Math.min(cort + (5 * factor), 100);
+        else cort = Math.max(cort - 1.2, 10);
+
+        // Vizual Yeniləmə
         document.getElementById('p-gold').innerText = gold.toFixed(2);
         document.getElementById('p-oil').innerText = oil.toFixed(2);
         document.getElementById('c-bar').style.width = cort + "%";
-        document.getElementById('c-num').innerText = Math.round(cort) + "%";
-        document.getElementById('c-pct').innerText = Math.round(cort) + "%";
+        document.getElementById('c-txt').innerText = Math.round(cort) + "%";
         document.getElementById('d-bar').style.width = dop + "%";
-        document.getElementById('d-num').innerText = Math.round(dop) + "%";
-        document.getElementById('d-pct').innerText = Math.round(dop) + "%";
+        document.getElementById('d-txt').innerText = Math.round(dop) + "%";
 
-        // Fear Greed
+        // Fear/Greed
         let fg = document.getElementById('fg-index');
         if(cort > 65) { fg.innerText = "FEAR"; fg.style.color = "#ff0844"; }
-        else if(dop > 65) { fg.innerText = "GREED"; fg.style.color = "#f1c40f"; }
+        else if(dop > 70) { fg.innerText = "GREED"; fg.style.color = "#f1c40f"; }
         else { fg.innerText = "NEUTRAL"; fg.style.color = "#4facfe"; }
 
-        if(cort >= 95) {
-            locked = true; document.getElementById('burnout-screen').style.display = 'flex';
-            setTimeout(() => { locked = false; cort = 30; document.getElementById('burnout-screen').style.display = 'none'; }, 5000);
+        // Burnout
+        if(cort >= 96) {
+            isLocked = true;
+            document.getElementById('burnout').style.display = 'flex';
+            setTimeout(() => { isLocked = false; cort = 30; document.getElementById('burnout').style.display = 'none'; }, 5000);
         }
 
-        hData.push(gold); hData.shift(); chart.update('none');
+        chartPrices.push(gold); chartPrices.shift(); chart.update('none');
     }
 
-    function trade() {
-        if(locked) return;
+    function makeTrade() {
+        if(isLocked) return;
         dop = Math.min(dop + 15, 100);
-        let log = document.getElementById('logs');
-        let emo = cort > 70 ? "<span style='color:#ff0844'>[Panic detected!]</span>" : (dop > 75 ? "<span style='color:#f1c40f'>[Risky Move!]</span>" : "[Rational]");
-        log.innerHTML = `<div>[${new Date().toLocaleTimeString().split(' ')[0]}] Trade: $${gold.toFixed(2)} ${emo}</div>` + log.innerHTML;
-        setTimeout(()=> { dop = Math.max(dop - 8, 20); }, 2000);
+        let status = cort > 70 ? "<span style='color:#ff0844'>[PANIC DETECTED!]</span>" : (dop > 75 ? "<span style='color:#f1c40f'>[RISKY MOVE!]</span>" : "[RATIONAL]");
+        addLog(`Trade: $${gold.toFixed(2)} ${status}`);
+        setTimeout(() => { dop = Math.max(dop - 8, 20); }, 2500);
     }
 
-    setInterval(logic, 1500);
+    function addLog(msg) {
+        let box = document.getElementById('logs');
+        let d = document.createElement('div');
+        d.innerHTML = `[${new Date().toLocaleTimeString().split(' ')[0]}] ${msg}`;
+        box.prepend(d);
+    }
+
+    setInterval(engine, 1500);
 </script>
 </body>
 </html>
